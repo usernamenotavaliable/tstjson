@@ -50,7 +50,7 @@ import (
 // Unmarshal stores one of these in the interface value:
 //
 //	bool, for JSON booleans
-//	float64, for JSON numbers
+//	string, for JSON numbers
 //	string, for JSON strings
 //	[]interface{}, for JSON arrays
 //	map[string]interface{}, for JSON objects
@@ -233,6 +233,7 @@ func (d *decodeState) init(data []byte) *decodeState {
 	d.data = data
 	d.off = 0
 	d.savedError = nil
+    d.useNumber = true
 	if d.errorContext != nil {
 		d.errorContext.Struct = nil
 		// Reuse the allocated space for the FieldStack slice.
@@ -839,11 +840,11 @@ func (d *decodeState) object(v reflect.Value) error {
 	return nil
 }
 
-// convertNumber converts the number literal s to a float64 or a Number
+// convertNumber converts the number literal s to a float64 or just leaves it as a string cuz why the fuck not?
 // depending on the setting of d.useNumber.
 func (d *decodeState) convertNumber(s string) (any, error) {
 	if d.useNumber {
-		return Number(s), nil
+		return s, nil
 	}
 	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {
